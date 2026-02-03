@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Pookie 💖</title>
+    <!-- Tailwind CSS (Included per system requirement, but primarily using custom CSS for specific theme) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        /* Import a cute font */
+        @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@300;500;700&display=swap');
+
+        :root {
+            --primary-color: #ff6b81;
+            --secondary-color: #ff9a9e;
+            --text-color: #ffffff;
+            --glow: 0 0 15px rgba(255, 107, 129, 0.6);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Animated Dreamy Gradient */
+            background: linear-gradient(-45deg, #ff9a9e, #fecfef, #e0c3fc, #d4a9ff, #ff9a9e);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            font-family: 'Quicksand', sans-serif;
+            color: white;
+            transition: background 1s ease;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Background overlay for texture or mood change */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.1) 100%);
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            text-align: center;
+            z-index: 10;
+            padding: 2rem;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            font-family: 'Pacifico', cursive;
+            font-size: 3.5rem;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            animation: bounce 2s infinite ease-in-out;
+            line-height: 1.4;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+            position: relative;
+            min-height: 80px; /* Space for buttons to move */
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .btn-yes {
+            background-color: white;
+            color: var(--primary-color);
+            z-index: 2;
+        }
+
+        .btn-yes:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            background-color: #fff0f3;
+        }
+
+        .btn-no {
+            background-color: rgba(255, 255, 255, 0.5);
+            color: #555;
+            position: relative; /* Starts in flow, becomes fixed via JS */
+            transition: top 0.2s ease, left 0.2s ease;
+            z-index: 1;
+        }
+
+        /* Success Message Styling */
+        .success-message {
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .success-text {
+            font-family: 'Pacifico', cursive;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .romantic-lines {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            margin-top: 20px;
+        }
+
+        /* Floating Hearts Animation CSS */
+        .heart {
+            position: absolute;
+            bottom: -50px;
+            background-color: var(--primary-color);
+            display: inline-block;
+            height: 30px;
+            width: 30px;
+            margin: 0 10px;
+            transform: rotate(-45deg);
+            animation: float 6s ease-in infinite;
+            opacity: 0.8;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .heart::before,
+        .heart::after {
+            content: "";
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            height: 30px;
+            position: absolute;
+            width: 30px;
+        }
+
+        .heart::before {
+            top: -15px;
+            left: 0;
+        }
+
+        .heart::after {
+            left: 15px;
+            top: 0;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(-45deg) scale(0.5);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-110vh) rotate(-45deg) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 2.5rem; }
+            button { padding: 12px 30px; font-size: 1.2rem; }
+            .romantic-lines { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay"></div>
+
+    <!-- Background Music -->
+    <!-- Using a soft, royalty-free piano track -->
+    <audio id="bg-music" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/10/25/audio_2491a7428f.mp3?filename=piano-moment-116345.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <div class="container" id="main-container">
+        
+        <!-- Question Section -->
+        <div id="question-section">
+            <h1>Hey Pookie 💕<br>Will you be my Valentine?</h1>
+            
+            <div class="buttons">
+                <!-- Wrapper for Yes button to keep it centered in flow -->
+                <div style="position: relative; width: 140px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                    <button class="btn-yes" id="yes-btn">Yes 💖</button>
+                </div>
+                <!-- No button starts next to it but moves absolutely -->
+                <button class="btn-no" id="no-btn">No 🙃</button>
+            </div>
+        </div>
+
+        <!-- Success Section (Hidden Initially) -->
+        <div class="success-message" id="success-section">
+            <div class="success-text">Yayyyy 💕<br>Pookie, you just made my heart so happy 💖</div>
+            <div class="romantic-lines">
+                <p>I promise to make you feel loved every single day.</p>
+                <p>You are the sweetest part of my life,</p>
+                <p>and I'm so lucky to call you mine.</p>
+                <p>Happy Valentine's Day, Beautiful! 🌹</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const yesBtn = document.getElementById('yes-btn');
+        const noBtn = document.getElementById('no-btn');
+        const questionSection = document.getElementById('question-section');
+        const successSection = document.getElementById('success-section');
+        const audio = document.getElementById('bg-music');
+        const body = document.body;
+
+        let yesScale = 1; // Track scale of Yes button
+
+        // No Button Logic: Run away on hover
+        function moveNoButton() {
+            // Make Yes button bigger every time No runs away
+            yesScale += 0.1; 
+            yesBtn.style.transform = `scale(${yesScale})`;
+
+            const container = document.querySelector('.container');
+            const containerRect = container.getBoundingClientRect();
+            const btnRect = noBtn.getBoundingClientRect();
+            
+            // Calculate available area within the window/container
+            // We want it to stay somewhat visible but jump around
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            
+            // Generate random position
+            // Keep it within 80% of viewport to avoid edge clipping
+            const randomX = Math.random() * (windowWidth - btnRect.width - 40) + 20;
+            const randomY = Math.random() * (windowHeight - btnRect.height - 40) + 20;
+            
+            // Set fixed position behavior
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = `${randomX}px`;
+            noBtn.style.top = `${randomY}px`;
+        }
+
+        noBtn.addEventListener('mouseover', moveNoButton);
+        noBtn.addEventListener('click', moveNoButton); // Just in case they click fast
+        noBtn.addEventListener('touchstart', (e) => { // Mobile touch
+            e.preventDefault();
+            moveNoButton();
+        });
+
+        // Yes Button Logic: Success state
+        yesBtn.addEventListener('click', () => {
+            // Play Music
+            audio.volume = 0.4; // Soft volume
+            audio.play().catch(e => console.log("Audio play failed (user interaction required):", e));
+
+            // Hide Question, Show Success
+            questionSection.style.display = 'none';
+            successSection.style.display = 'block';
+            
+            // Fade in animation
+            setTimeout(() => {
+                successSection.style.opacity = '1';
+            }, 10);
+
+            // Change background to deeper love color
+            body.style.background = 'linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%)';
+
+            // Start Floating Hearts
+            createHearts();
+        });
+
+        // Floating Hearts Generator
+        function createHearts() {
+            const colors = ['#ff4d4d', '#ff9a9e', '#ffffff', '#ff6b81'];
+            
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.classList.add('heart');
+                
+                // Randomize heart properties
+                const randomLeft = Math.random() * 100; // 0 to 100vw
+                const randomDuration = Math.random() * 3 + 3; // 3 to 6s
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                heart.style.left = `${randomLeft}vw`;
+                heart.style.animationDuration = `${randomDuration}s`;
+                heart.style.setProperty('--primary-color', randomColor);
+                
+                document.body.appendChild(heart);
+
+                // Remove heart after animation
+                setTimeout(() => {
+                    heart.remove();
+                }, randomDuration * 1000);
+
+            }, 300); // New heart every 300ms
+        }
+
+        // Auto-play music on load (or first interaction)
+        window.addEventListener('load', () => {
+            audio.volume = 0.3; // Gentle volume
+            const playPromise = audio.play();
+
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Autoplay blocked. Waiting for user interaction.");
+                    // Add listener to play on first click anywhere
+                    const startAudio = () => {
+                        audio.play();
+                        document.removeEventListener('click', startAudio);
+                        document.removeEventListener('touchstart', startAudio);
+                    };
+                    document.addEventListener('click', startAudio);
+                    document.addEventListener('touchstart', startAudio);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
