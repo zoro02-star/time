@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cybersecurity Portfolio — Terminal</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    :root{
+      --bg: #040b07;
+      --panel: rgba(3, 18, 10, 0.92);
+      --ink: #b8ffcc;
+      --muted: rgba(184, 255, 204, 0.7);
+      --dim: rgba(184, 255, 204, 0.45);
+      --accent: #2bff7a;
+      --accent2: #00e676;
+      --danger: #ff4d4d;
+      --border: rgba(43, 255, 122, 0.22);
+      --shadow: rgba(0, 255, 128, 0.18);
+      --scanline: rgba(0, 0, 0, 0.20);
+      --glow: 0 0 14px rgba(43,255,122,0.18), 0 0 48px rgba(43,255,122,0.10);
+      --caret: rgba(43,255,122,0.95);
+      --gradient1: rgba(43,255,122,0.10);
+      --gradient2: rgba(0,230,118,0.08);
+      --gradient3: rgba(43,255,122,0.06);
+    }
+
+    .theme-red{
+      --bg: #0b0404;
+      --panel: rgba(18, 3, 3, 0.92);
+      --ink: #ffb8b8;
+      --muted: rgba(255, 184, 184, 0.7);
+      --dim: rgba(255, 184, 184, 0.45);
+      --accent: #ff2b2b;
+      --accent2: #e60000;
+      --danger: #ff4d4d;
+      --border: rgba(255, 43, 43, 0.22);
+      --shadow: rgba(255, 0, 0, 0.18);
+      --scanline: rgba(0, 0, 0, 0.20);
+      --glow: 0 0 14px rgba(255,43,43,0.18), 0 0 48px rgba(255,43,43,0.10);
+      --caret: rgba(255,43,43,0.95);
+      --gradient1: rgba(255,43,43,0.10);
+      --gradient2: rgba(230,0,0,0.08);
+      --gradient3: rgba(255,43,43,0.06);
+    }
+
+    .theme-blue{
+      --bg: #04040b;
+      --panel: rgba(3, 3, 18, 0.92);
+      --ink: #b8ccff;
+      --muted: rgba(184, 204, 255, 0.7);
+      --dim: rgba(184, 204, 255, 0.45);
+      --accent: #2b7aff;
+      --accent2: #0066e6;
+      --danger: #ff4d4d;
+      --border: rgba(43, 122, 255, 0.22);
+      --shadow: rgba(0, 85, 255, 0.18);
+      --scanline: rgba(0, 0, 0, 0.20);
+      --glow: 0 0 14px rgba(43,122,255,0.18), 0 0 48px rgba(43,122,255,0.10);
+      --caret: rgba(43,122,255,0.95);
+      --gradient1: rgba(43,122,255,0.10);
+      --gradient2: rgba(0,102,230,0.08);
+      --gradient3: rgba(43,122,255,0.06);
+    }
+
+    html, body { height: 100%; }
+    body {
+      background: radial-gradient(1200px 900px at 20% 10%, var(--gradient1), transparent 50%),
+                  radial-gradient(1000px 700px at 80% 30%, var(--gradient2), transparent 55%),
+                  radial-gradient(900px 900px at 45% 95%, var(--gradient3), transparent 60%),
+                  var(--bg);
+      color: var(--ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      overflow: hidden;
+    }
+
+    /* Terminal CRT overlay */
+    .crt {
+      position: relative;
+      isolation: isolate;
+    }
+    .crt::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(0,0,0,0.0) 0px,
+          rgba(0,0,0,0.0) 2px,
+          var(--scanline) 3px
+        );
+      opacity: 0.35;
+      mix-blend-mode: multiply;
+    }
+    .crt::after{
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 21;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(255,255,255,0.00) 25%, rgba(0,0,0,0.12));
+      opacity: 0.20;
+      mix-blend-mode: overlay;
+    }
+
+    /* Subtle noise */
+    .noise {
+      position: absolute;
+      inset: 0;
+      z-index: 22;
+      pointer-events: none;
+      opacity: 0.10;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E");
+      background-size: 180px 180px;
+      animation: noiseShift 7s steps(2) infinite;
+    }
+    @keyframes noiseShift {
+      0% { transform: translate3d(0,0,0); }
+      20% { transform: translate3d(-1%, 1%, 0); }
+      40% { transform: translate3d(1%, -1%, 0); }
+      60% { transform: translate3d(1%, 1%, 0); }
+      80% { transform: translate3d(-1%, -1%, 0); }
+      100% { transform: translate3d(0,0,0); }
+    }
+
+    .terminal-frame {
+      background: linear-gradient(to bottom, rgba(3,18,10,0.92), rgba(3,18,10,0.86));
+      border: 1px solid var(--border);
+      box-shadow: 0 0 0 1px rgba(43,255,122,0.08) inset, var(--glow);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .titlebar {
+      background: linear-gradient(to right, rgba(43,255,122,0.10), rgba(0,230,118,0.06));
+      border-bottom: 1px solid rgba(43,255,122,0.16);
+    }
+
+    .dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; }
+
+    .ascii {
+      white-space: pre;
+      line-height: 1.05;
+      color: rgba(184,255,204,0.92);
+      text-shadow: 0 0 10px rgba(43,255,122,0.20);
+      user-select: none;
+    }
+
+    .filetab {
+      border: 1px solid rgba(43,255,122,0.18);
+      background: rgba(0,0,0,0.22);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      transition: transform 120ms ease, background 120ms ease, color 120ms ease, border-color 120ms ease;
+    }
+    .filetab:hover {
+      transform: translateY(-1px);
+      background: rgba(43,255,122,0.10);
+      color: var(--ink);
+      border-color: rgba(43,255,122,0.30);
+    }
+    .filetab[aria-current="true"]{
+      background: rgba(43,255,122,0.16);
+      color: rgba(240,255,245,0.95);
+      border-color: rgba(43,255,122,0.38);
+    }
+
+    .output {
+      font-size: 13.5px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .line { display: block; }
+    .prompt { color: rgba(184,255,204,0.88); }
+    .path { color: rgba(43,255,122,0.92); }
+    .cmd { color: rgba(240,255,245,0.96); }
+    .muted { color: var(--muted); }
+    .dim { color: var(--dim); }
+    .accent { color: var(--accent); }
+    .danger { color: var(--danger); }
+
+    .inputrow {
+      border-top: 1px solid rgba(43,255,122,0.12);
+      background: rgba(0,0,0,0.20);
+    }
+
+    input.terminal-input {
+      background: transparent;
+      outline: none;
+      width: 100%;
+      color: rgba(240,255,245,0.96);
+      caret-color: var(--caret);
+      font-size: 13.5px;
+    }
+
+    .kbd {
+      border: 1px solid rgba(43,255,122,0.22);
+      background: rgba(0,0,0,0.22);
+      padding: 2px 6px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: rgba(184,255,204,0.82);
+    }
+
+    .scrollbar::-webkit-scrollbar{ width: 10px; }
+    .scrollbar::-webkit-scrollbar-track{ background: rgba(0,0,0,0.18); }
+    .scrollbar::-webkit-scrollbar-thumb{ background: rgba(43,255,122,0.18); border-radius: 999px; }
+    .scrollbar::-webkit-scrollbar-thumb:hover{ background: rgba(43,255,122,0.26); }
+
+    .blink {
+      display: inline-block;
+      width: 10px;
+      background: rgba(43,255,122,0.0);
+      border-left: 2px solid rgba(43,255,122,0.85);
+      margin-left: 2px;
+      animation: blink 1.05s steps(1) infinite;
+      transform: translateY(2px);
+    }
+    @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+    .hintbar {
+      border-top: 1px solid rgba(43,255,122,0.10);
+      color: rgba(184,255,204,0.62);
+      font-size: 12px;
+      background: rgba(0,0,0,0.16);
+    }
+
+    .link {
+      color: rgba(43,255,122,0.92);
+      text-decoration: underline;
+      text-decoration-color: rgba(43,255,122,0.35);
+      text-underline-offset: 2px;
+    }
+    .link:hover { text-decoration-color: rgba(43,255,122,0.75); }
+
+    /* Improved Mobile Responsiveness */
+    @media (max-width: 640px){
+      .ascii { font-size: 9px; line-height: 1.0; }
+      .output, input.terminal-input { font-size: 12px; }
+      .titlebar { padding: 0.5rem; }
+      .titlebar .text-xs { font-size: 10px; }
+      .dot { width: 8px; height: 8px; }
+      .filetab { font-size: 11px; padding: 4px 8px; }
+      .hintbar { font-size: 11px; padding: 0.5rem; }
+      .hintbar > span { display: none; }
+      .hintbar > span:last-child { display: block; width: 100%; text-align: center; }
+      .kbd { font-size: 10px; padding: 1px 4px; }
+      .terminal-frame { border-radius: 12px; }
+    }
+    
+    @media (max-width: 480px){
+      .ascii { font-size: 7px; }
+      .output, input.terminal-input { font-size: 11px; line-height: 1.4; }
+      section:first-of-type { padding-top: 0.75rem; padding-bottom: 0.5rem; }
+      .inputrow { padding: 0.5rem 1rem; }
+      main.terminal-frame { height: 96vh; }
+    }
+    
+    @media (min-width: 1400px){
+      .ascii { font-size: 11px; }
+      .terminal-frame { max-width: 1400px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="crt min-h-screen w-full flex items-center justify-center p-4 sm:p-6">
+    <div class="noise"></div>
+
+    <main class="terminal-frame w-full max-w-5xl h-[92vh] flex flex-col">
+      <header class="titlebar px-4 py-3 flex items-center gap-3">
+        <div class="flex items-center gap-2" aria-hidden="true">
+          <span class="dot" style="background:#ff5f56; box-shadow: 0 0 10px rgba(255,95,86,.15);"></span>
+          <span class="dot" style="background:#ffbd2e; box-shadow: 0 0 10px rgba(255,189,46,.15);"></span>
+          <span class="dot" style="background:#27c93f; box-shadow: 0 0 10px rgba(39,201,63,.15);"></span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs text-[rgba(184,255,204,0.70)] truncate">Terminal</div>
+        </div>
+        <button id="btnTheme" class="filetab mr-2" title="Toggle theme">theme</button>
+        <button id="btnCopy" class="filetab" title="Copy contact email">copy email</button>
+      </header>
+
+      <section class="px-4 pt-4 pb-2">
+        <div class="ascii" id="ascii"></div>
+
+        <div class="mt-3 flex flex-wrap gap-2" id="fileTabs" aria-label="files"></div>
+      </section>
+
+      <section class="flex-1 px-4 pb-0 overflow-hidden">
+        <div id="output" class="output scrollbar h-full overflow-y-auto pr-2 pb-3"></div>
+      </section>
+
+      <section class="inputrow px-4 py-3">
+        <div class="flex items-center gap-2">
+          <div class="shrink-0 text-[13.5px]">
+            <span class="prompt" id="promptUser">guest</span><span class="dim">@</span><span class="accent" id="promptHost">kali</span><span class="dim">:</span><span class="path" id="promptPath">~/portfolio</span><span class="dim">$</span>
+          </div>
+          <div class="flex-1 flex items-center">
+            <input id="cmd" class="terminal-input" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="type 'help' then press Enter" />
+            <span class="blink" aria-hidden="true"></span>
+          </div>
+        </div>
+      </section>
+
+      <footer class="hintbar px-4 py-2 flex flex-wrap gap-x-4 gap-y-1">
+        <span><span class="kbd">Enter</span> run</span>
+        <span><span class="kbd">Tab</span> autocomplete</span>
+        <span><span class="kbd">↑</span>/<span class="kbd">↓</span> history</span>
+        <span><span class="kbd">Ctrl</span>+<span class="kbd">L</span> clear</span>
+        <span class="ml-auto">try: <span class="accent">neofetch</span>, <span class="accent">ls</span>, <span class="accent">cat aboutme.txt</span></span>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    // ====== Customize these ======
+    const PROFILE = {
+      name: "Harsh Kaloliya",
+      role: "Bug Bounty | Pen-Testing",
+      handle: "@zoro02-star",
+      location: "India / Remote",
+      email: "kaloliyaharsh00@gmail.com",
+      website: "https://github.com/zoro02-star",
+      github: "https://github.com/zoro02-star",
+      linkedin: "https://linkedin.com/in/yourhandle",
+      phone: "+91 7096082563",
+      focus: ["Bug-Bounty, Pen-Testing, learning more"],
+      highlights: [
+        "Active bug bounty researcher on Bugcrowd, HackerOne, and OpenBugBounty",
+        "Hands-on experience with authentication, authorization & business logic vulnerabilities",
+        "Security-first mindset: STRIDE threat modeling and OWASP testing frameworks"
+      ]
+    };
+
+    const FILES = {
+      "aboutme.txt": () => [
+        "[ABOUT]",
+        `Name      : ${PROFILE.name}`,
+        `Role      : ${PROFILE.role}`,
+        `Handle    : ${PROFILE.handle}`,
+        `Location  : ${PROFILE.location}`,
+        "",
+        "SUMMARY:",
+        "  Security-focused student with hands-on experience in web application security",
+        "  testing using OWASP Top 10 and OWASP WSTG. Strong understanding of authentication,",
+        "  authorization, session management, and business logic vulnerabilities with practical",
+        "  manual testing experience.",
+        "",
+        "Current focus:",
+        ...PROFILE.focus.map(x => `  - ${x}`),
+        "",
+        "Highlights:",
+        ...PROFILE.highlights.map(x => `  * ${x}`),
+        "",
+        "Tip: run 'neofetch' for a quick summary."
+      ].join("\n"),
+
+      "tools.txt": () => [
+        "[SKILLS & TOOLS]",
+        "",
+        "Web Security:",
+        "  - OWASP Top 10 & OWASP WSTG",
+        "  - Authentication & Authorization Testing",
+        "  - Business Logic Vulnerabilities",
+        "  - Session Management",
+        "",
+        "Testing Techniques:",
+        "  - Manual Testing & Code Review",
+        "  - Reconnaissance & OSINT",
+        "  - IDOR, XSS, CSRF, SQLi",
+        "  - Attack Surface Mapping",
+        "",
+        "Tools & Technologies:",
+        "  - Burp Suite (primary testing tool)",
+        "  - Linux, Nmap, Nuclei",
+        "  - Amass, Subfinder, HTTPX",
+        "  - Curl, BloodHound, Metasploit",
+        "",
+        "Methodologies:",
+        "  - STRIDE Threat Modeling",
+        "  - OWASP-based Testing Framework",
+        "",
+        "Try: 'cat projects.txt' or 'open projects.txt'"
+      ].join("\n"),
+
+      "projects.txt": () => [
+        "[PROJECTS & EXPERIENCE]",
+        "",
+        "1) Advanced Web Recon",
+        "   - Subdomain enumeration and discovery",
+        "   - Parameter and endpoint discovery",
+        "   - Attack surface mapping using automation and manual techniques",
+        "   - Tech: Amass, Subfinder, HTTPX, Nuclei, custom scripts",
+        "",
+        "2) Security Testing Methodology & Checklists",
+        "   - STRIDE Threat modeling implementation",
+        "   - OWASP-based testing framework",
+        "   - Custom vulnerability assessment checklists",
+        "   - Focus: systematic approach to web security testing",
+        "",
+        "3) Independent Web Security Research (2025 – Present)",
+        "   - Active bug bounty hunting on Bugcrowd, HackerOne, OpenBugBounty",
+        "   - Conducted recon and attack surface mapping",
+        "   - Manual testing of real-world assets",
+        "   - Documented vulnerabilities with PoCs and remediation advice",
+        "",
+        "Tip: run 'socials' or 'cat contact.txt' for more info."
+      ].join("\n"),
+
+      "certs.txt": () => [
+        "[EDUCATION & CERTIFICATIONS]",
+        "",
+        "Education:",
+        "  BSc IT – Security and Networking",
+        "  Gujarat University | 2023 – 2024",
+        "",
+        "Certifications & Training:",
+        "  - OWASP Top 10 & WSTG (Self-Study)",
+        "  - PortSwigger Web Security Academy (Labs Completed)",
+        "",
+        "Continuous Learning:",
+        "  - Bug bounty platforms (Bugcrowd, HackerOne, OpenBugBounty)",
+        "  - Active participation in disclosure programs",
+        "  - Hands-on vulnerability research and testing",
+        "",
+        "Focus Areas:",
+        "  - Web application security testing",
+        "  - Manual penetration testing methodologies",
+        "  - Real-world vulnerability discovery and remediation"
+      ].join("\n"),
+
+      "contact.txt": () => [
+        "[CONTACT]",
+        `Email    : ${PROFILE.email}`,
+        `Phone    : ${PROFILE.phone}`,
+        `GitHub   : ${PROFILE.github}`,
+        `LinkedIn : ${PROFILE.linkedin}`,
+        "",
+        "Bug Bounty Platforms:",
+        "  - Bugcrowd",
+        "  - HackerOne", 
+        "  - OpenBugBounty",
+        "  - Various Disclosure Programs",
+        "",
+        "Availability:",
+        "  Open for collaboration, bug bounty tips, and security discussions.",
+        "",
+        "Tip: click 'copy email' in the title bar."
+      ].join("\n"),
+
+      "readme.md": () => [
+        "# terminal-portfolio",
+        "",
+        "Commands:",
+        "- help: show commands",
+        "- ls: list files",
+        "- cat <file>: print file",
+        "- open <file>: same as cat",
+        "- neofetch: summary",
+        "- socials: links",
+        "- clear: clear output",
+        "- banner: show ascii banner",
+        "",
+        "Shortcuts:",
+        "- Ctrl+L: clear",
+        "- Tab: autocomplete",
+        "",
+        "Edit PROFILE + FILES in the HTML to personalize."
+      ].join("\n")
+    };
+
+    // ====== Terminal engine ======
+    const state = {
+      cwd: "~/portfolio",
+      user: "guest",
+      host: "kali",
+      history: [],
+      historyIndex: -1,
+      lastOpened: null,
+      currentTab: null
+    };
+
+    const elOut = document.getElementById('output');
+    const elCmd = document.getElementById('cmd');
+    const elAscii = document.getElementById('ascii');
+    const elTabs = document.getElementById('fileTabs');
+    const btnCopy = document.getElementById('btnCopy');
+    const btnTheme = document.getElementById('btnTheme');
+
+    document.getElementById('promptUser').textContent = state.user;
+    document.getElementById('promptHost').textContent = state.host;
+    document.getElementById('promptPath').textContent = state.cwd;
+
+    const ASCII_BANNER = String.raw`
+⣿⣿⣿⣿⣿⣷⣿⣿⣿⡅⡹⢿⠆⠙⠋⠉⠻⠿⣿⣿⣿⣿⣿⣿⣮⠻⣦⡙⢷⡑⠘⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣌⠡⠌⠂⣙⠻⣛⠻⠷⠐⠈⠛⢱⣮⣷⣽⣿
+⣿⣿⣿⣿⡇⢿⢹⣿⣶⠐⠁⠀⣀⣠⣤⠄⠀⠀⠈⠙⠻⣿⣿⣿⣦⣵⣌⠻⣷⢝⠦⠚⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢟⣻⣿⣊⡃⠀⣙⠿⣿⣿⣿⣎⢮⡀⢮⣽⣿⣿
+⢿⣿⣿⣿⣧⡸⡎⡛⡩⠖⠀⣴⣿⣿⣿⠀⠀⠀⠀⠸⠇⠀⠙⢿⣿⣿⣿⣷⣌⢷⣑⢷⣄⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣫⠶⠛⠉⠀⠁⠀⠈⠈⠀⠠⠜⠻⣿⣆⢿⣼⣿⣿⣿
+⢐⣿⣿⣿⣿⣧⢧⣧⢻⣦⢀⣹⣿⣿⣿⣇⠀⠄⠀⠀⠀⡀⠀⠈⢻⣿⣿⣿⣿⣷⣝⢦⡹⠷⡙⢿⣿⣿⣿⣿⣿⣿⣿⣿⠈⠁⠀⠀⠀⠁⠀⠀⠀⠱⣶⣄⡀⠀⠈⠛⠜⣿⣿⣿⣿
+⠀⠊⢫⣿⣏⣿⡌⣼⣄⢫⡌⣿⣿⣿⣿⣿⣦⡈⠲⣄⣤⣤⡡⢀⣠⣿⣿⣿⣿⣿⣿⣷⣼⣍⢬⣦⡙⣿⣿⣿⣿⣿⣯⢁⡄⠀⡀⡀⠀⠄⢈⣠⢪⠀⣿⣿⣿⣦⠀⢉⢂⠹⡿⣿⣿
+⠀⠀⠄⢹⢃⢻⣟⠙⣿⣦⠱⢻⣿⣿⣿⣿⣿⣿⣷⣬⣍⣭⣥⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⡙⢿⣼⡿⣿⣿⣿⣿⣿⣷⣄⠘⣱⢦⣤⡴⡿⢈⣼⣿⣿⣿⣇⣴⣶⣮⣅⢻⣿⡏
+⠀⠀⠈⠹⣇⢡⢿⡆⠻⣿⣷⠀⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣍⡻⣿⣟⣻⣿⣿⣿⣿⣷⣦⣥⣬⣤⣴⣾⣿⣿⣿⣿⣷⣿⣿⣿⣿⣷⡜⠃
+⠀⠀⠀⢀⣘⠈⢂⠃⣧⡹⣿⣷⡄⠙⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣮⣅⡙⢿⣟⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠋⡕⠂
+⠀⠀⠀⠀⠀⠀⠛⢷⣜⢷⡌⠻⣿⣿⣦⣝⣻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣯⣹⣷⣦⣹⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠉⠃⠀⠀⠀⠀⠀
+
+`;
+
+    function setBanner(){
+      // Clear the banner initially
+      elAscii.textContent = '';
+      // Type out the banner character by character
+      const banner = ASCII_BANNER.trimEnd();
+      let i = 0;
+      function typeChar() {
+        if (i < banner.length) {
+          elAscii.textContent += banner.charAt(i);
+          i++;
+          setTimeout(typeChar, Math.random() * 20 + 10); // Random speed
+        }
+      }
+      // Start typing after a short delay
+      setTimeout(typeChar, 300);
+    }
+
+    function escapeHtml(s){
+      return s
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
+    }
+
+    function nowStamp(){
+      const d = new Date();
+      return d.toLocaleString();
+    }
+
+    function scrollToBottom(){
+      elOut.scrollTop = elOut.scrollHeight;
+    }
+
+    function printLine(text = ""){
+      const div = document.createElement('div');
+      div.className = 'line';
+      // allow a small subset of markup for links + color
+      div.innerHTML = text;
+      elOut.appendChild(div);
+      scrollToBottom();
+    }
+
+    function printBlock(text = ""){
+      const safe = escapeHtml(text);
+      // Preserve line breaks
+      const html = safe.replaceAll("\n", "<br>");
+      printLine(html);
+    }
+
+    function printPromptEcho(raw){
+      const cmd = escapeHtml(raw);
+      const p = `<span class="prompt">${escapeHtml(state.user)}</span><span class="dim">@</span><span class="accent">${escapeHtml(state.host)}</span><span class="dim">:</span><span class="path">${escapeHtml(state.cwd)}</span><span class="dim">$</span> <span class="cmd">${cmd}</span>`;
+      printLine(p);
+    }
+
+    function listFiles(){
+      const names = Object.keys(FILES);
+      // nice columns
+      const pad = Math.max(...names.map(n => n.length)) + 2;
+      const cols = Math.max(1, Math.floor((Math.min(980, elOut.clientWidth || 980)) / (pad * 9)));
+      const rows = Math.ceil(names.length / cols);
+      const lines = [];
+      for (let r = 0; r < rows; r++){
+        let line = "";
+        for (let c = 0; c < cols; c++){
+          const i = r + c * rows;
+          if (i >= names.length) continue;
+          const n = names[i];
+          line += n.padEnd(pad, ' ');
+        }
+        lines.push(line.trimEnd());
+      }
+      printBlock(lines.join("\n"));
+    }
+
+    function socials(){
+      const mk = (label, url) => `${label}: <a class="link" target="_blank" rel="noopener noreferrer" href="${url}">${url}</a>`;
+      printLine(mk("Website ", PROFILE.website));
+      printLine(mk("GitHub  ", PROFILE.github));
+      printLine(mk("LinkedIn", PROFILE.linkedin));
+    }
+
+    function neofetch(){
+      const left = [
+        "      .--.",
+        "     |o_o |",
+        "     |:_/ |",
+        "    //   \\ \\",
+        "   (|     | )",
+        "  /'\\_   _/`\\",
+        "  \\___)=(___/"
+      ];
+      const right = [
+        `${PROFILE.name}  (${PROFILE.handle})`,
+        "-----------------------------",
+        `Role     : ${PROFILE.role}`,
+        `Location : ${PROFILE.location}`,
+        `Time     : ${nowStamp()}`,
+        `Focus    : ${PROFILE.focus.join(", ")}`,
+        `Files    : ${Object.keys(FILES).length}`
+      ];
+      const width = Math.max(...left.map(s => s.length));
+      const lines = [];
+      for (let i = 0; i < Math.max(left.length, right.length); i++){
+        const l = left[i] || "";
+        const r = right[i] || "";
+        lines.push(l.padEnd(width + 3, ' ') + r);
+      }
+      printBlock(lines.join("\n"));
+    }
+
+    function help(){
+      printBlock([
+        "Commands:",
+        "  help                 Show this help",
+        "  ls                   List files",
+        "  cat <file>           Print a file (aboutme.txt, tools.txt, ...)",
+        "  open <file>          Alias for cat",
+        "  neofetch             Quick profile summary",
+        "  socials              Open-safe links list",
+        "  banner               Print ASCII banner",
+        "  clear                Clear screen",
+        "  whoami               Show current user",
+        "  date                 Show current date/time",
+        "  echo <text>          Print text",
+        "",
+        "Tips:",
+        "  - Click a file tab to run: cat <file>",
+        "  - Use Tab to autocomplete commands/files",
+        "  - Ctrl+L clears the screen"
+      ].join("\n"));
+    }
+
+    function setCurrentTab(name){
+      state.currentTab = name;
+      [...elTabs.querySelectorAll('button[data-file]')].forEach(b => {
+        b.setAttribute('aria-current', b.dataset.file === name ? 'true' : 'false');
+      });
+    }
+
+    function cat(file){
+      if (!file){
+        printLine(`<span class="danger">error:</span> missing file. usage: <span class="accent">cat &lt;file&gt;</span>`);
+        return;
+      }
+      const key = file.trim();
+      if (!FILES[key]){
+        printLine(`<span class="danger">error:</span> file not found: <span class="cmd">${escapeHtml(key)}</span>`);
+        printLine(`<span class="dim">hint:</span> try <span class="accent">ls</span>`);
+        return;
+      }
+      state.lastOpened = key;
+      setCurrentTab(key);
+      printBlock(FILES[key]());
+    }
+
+    function clear(){
+      elOut.innerHTML = "";
+    }
+
+    function run(raw){
+      const input = (raw ?? "").trim();
+      if (!input) return;
+
+      state.history.push(input);
+      state.historyIndex = state.history.length;
+
+      printPromptEcho(input);
+
+      const [cmd, ...rest] = input.split(/\s+/);
+      const argstr = rest.join(' ');
+
+      switch ((cmd || "").toLowerCase()){
+        case 'help':
+        case '?':
+          help();
+          break;
+        case 'ls':
+        case 'dir':
+          listFiles();
+          break;
+        case 'cat':
+        case 'type':
+          cat(argstr);
+          break;
+        case 'open':
+          cat(argstr);
+          break;
+        case 'clear':
+        case 'cls':
+          clear();
+          break;
+        case 'banner':
+          printBlock(ASCII_BANNER.trimEnd());
+          break;
+        case 'whoami':
+          printBlock(state.user);
+          break;
+        case 'date':
+          printBlock(nowStamp());
+          break;
+        case 'echo':
+          printBlock(argstr);
+          break;
+        case 'socials':
+          socials();
+          break;
+        case 'neofetch':
+          neofetch();
+          break;
+        case 'sudo':
+          printLine(`<span class="danger">permission denied</span><span class="dim">: this is a demo shell</span>`);
+          break;
+        case 'scan':
+          printLine(`<span class="accent">[+] Scanning target: ${argstr || '127.0.0.1'}</span>`);
+          printLine(`<span class="dim">[*] Starting Nmap 7.93 scan at ${nowStamp()}</span>`);
+          printLine(`<span class="dim">[*] Discovered open ports:</span>`);
+          printLine(`<span class="muted">  22/tcp   ssh</span>`);
+          printLine(`<span class="muted">  80/tcp   http</span>`);
+          printLine(`<span class="muted">  443/tcp  https</span>`);
+          printLine(`<span class="dim">[*] Nmap done: 1 IP address scanned</span>`);
+          break;
+        case 'hack':
+          printLine(`<span class="danger">[!] Initiating hack sequence...</span>`);
+          printLine(`<span class="dim">[*] Bypassing firewall...</span>`);
+          printLine(`<span class="dim">[*] Exploiting vulnerability CVE-2024-XXXX...</span>`);
+          printLine(`<span class="dim">[*] Planting flag: ${PROFILE.handle}_was_here</span>`);
+          printLine(`<span class="accent">[+] Hack completed successfully (ethically)!</span>`);
+          break;
+        case 'decrypt':
+          printLine(`<span class="accent">[+] Decrypting ciphertext...</span>`);
+          printLine(`<span class="dim">[*] Using AES-256-GCM...</span>`);
+          printLine(`<span class="dim">[*] Key derived from passphrase...</span>`);
+          printLine(`<span class="dim">[*] Plaintext: "Security is a process, not a product."</span>`);
+          break;
+        default:
+          // Easter eggs / friendly errors
+          if (cmd.toLowerCase() === 'cat' && !argstr) {
+            cat("");
+          } else {
+            printLine(`<span class="danger">command not found:</span> <span class="cmd">${escapeHtml(cmd)}</span>`);
+            printLine(`<span class="dim">hint:</span> type <span class="accent">help</span>`);
+          }
+      }
+    }
+
+    const COMMANDS = ["help","ls","cat","open","clear","banner","whoami","date","echo","socials","neofetch","sudo","scan","hack","decrypt"];
+
+    function getCandidates(prefix){
+      const p = (prefix || "").toLowerCase();
+      const fileCandidates = Object.keys(FILES);
+      return [...new Set([...COMMANDS, ...fileCandidates])]
+        .filter(x => x.toLowerCase().startsWith(p))
+        .sort((a,b) => a.localeCompare(b));
+    }
+
+    function autocomplete(){
+      const value = elCmd.value;
+      const parts = value.split(/\s+/);
+      if (parts.length === 1){
+        const cands = COMMANDS.filter(c => c.startsWith(parts[0].toLowerCase()));
+        if (cands.length === 1){
+          elCmd.value = cands[0] + ' ';
+        } else if (cands.length > 1){
+          printBlock(cands.join("  ")); 
+        }
+        return;
+      }
+      const cmd = parts[0].toLowerCase();
+      const last = parts[parts.length - 1];
+      if (["cat","open","type"].includes(cmd)){
+        const cands = Object.keys(FILES).filter(f => f.startsWith(last));
+        if (cands.length === 1){
+          parts[parts.length - 1] = cands[0];
+          elCmd.value = parts.join(' ');
+        } else if (cands.length > 1){
+          printBlock(cands.join("  "));
+        }
+      }
+    }
+
+    function buildTabs(){
+      const names = Object.keys(FILES);
+      elTabs.innerHTML = '';
+      names.forEach((name) => {
+        const b = document.createElement('button');
+        b.className = 'filetab';
+        b.type = 'button';
+        b.textContent = name;
+        b.dataset.file = name;
+        b.setAttribute('aria-current', 'false');
+        b.addEventListener('click', () => run(`cat ${name}`));
+        elTabs.appendChild(b);
+      });
+    }
+
+    function boot(){
+      setBanner();
+      buildTabs();
+      clear();
+
+      printLine(`<span class="accent">session</span> established <span class="dim">(${escapeHtml(nowStamp())})</span>`);
+      printLine(`<span class="dim">type</span> <span class="accent">help</span> <span class="dim">to list commands. click a file tab to open it.</span>`);
+      printLine('');
+      neofetch();
+      printLine('');
+      printLine(`<span class="dim">quickstart:</span> <span class="accent">ls</span> · <span class="accent">cat aboutme.txt</span> · <span class="accent">cat tools.txt</span>`);
+      printLine('');
+
+      elCmd.focus();
+    }
+
+    // ====== Events ======
+    elCmd.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter'){
+        const v = elCmd.value;
+        elCmd.value = '';
+        run(v);
+      } else if (e.key === 'Tab'){
+        e.preventDefault();
+        autocomplete();
+      } else if (e.key === 'ArrowUp'){
+        e.preventDefault();
+        if (state.history.length === 0) return;
+        state.historyIndex = Math.max(0, state.historyIndex - 1);
+        elCmd.value = state.history[state.historyIndex] || '';
+        // move caret to end
+        setTimeout(() => elCmd.setSelectionRange(elCmd.value.length, elCmd.value.length), 0);
+      } else if (e.key === 'ArrowDown'){
+        e.preventDefault();
+        if (state.history.length === 0) return;
+        state.historyIndex = Math.min(state.history.length, state.historyIndex + 1);
+        elCmd.value = state.history[state.historyIndex] || '';
+        setTimeout(() => elCmd.setSelectionRange(elCmd.value.length, elCmd.value.length), 0);
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'l'){
+        e.preventDefault();
+        clear();
+      }
+    });
+
+    // Click-to-focus terminal
+    document.querySelector('main').addEventListener('mousedown', (e) => {
+      // don't steal focus from interactive controls
+      if (e.target && (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT')) return;
+      elCmd.focus();
+    });
+
+    btnCopy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(PROFILE.email);
+        printLine(`<span class="dim">copied:</span> <span class="cmd">${escapeHtml(PROFILE.email)}</span>`);
+      } catch {
+        printLine(`<span class="danger">copy failed</span><span class="dim"> (browser blocked clipboard). email:</span> <span class="cmd">${escapeHtml(PROFILE.email)}</span>`);
+      }
+      elCmd.focus();
+    });
+
+    // Theme switcher
+    const THEMES = ['', 'theme-red', 'theme-blue'];
+    let currentTheme = 0;
+    btnTheme.addEventListener('click', () => {
+      document.body.classList.remove(...THEMES);
+      currentTheme = (currentTheme + 1) % THEMES.length;
+      if (THEMES[currentTheme]) {
+        document.body.classList.add(THEMES[currentTheme]);
+      }
+      const themeName = THEMES[currentTheme] === '' ? 'green' : THEMES[currentTheme].replace('theme-', '');
+      printLine(`<span class="accent">[theme]</span> <span class="dim">switched to:</span> <span class="cmd">${themeName}</span>`);
+      elCmd.focus();
+    });
+
+    // boot
+    boot();
+  </script>
+</body>
+
+</html>
+
